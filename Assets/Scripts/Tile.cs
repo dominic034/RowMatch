@@ -6,10 +6,12 @@ public class Tile : MonoBehaviour
 {
     [SerializeField] private CellType type;
     [SerializeField] private Vector2Int pos;
+    [SerializeField] private Vector2Int targetPos;
     [SerializeField] private SpriteRenderer spriteRenderer;
-
+    
     private bool _isInteractable = false;
     private Action<Vector2Int, Vector2Int> _onSwipeEvent;
+    
     public void SetType(CellType type)
     {
         this.type = type;
@@ -21,10 +23,14 @@ public class Tile : MonoBehaviour
         pos.y = y;
     }
 
-    [ContextMenu("Test")]
-    private void Test()
+    public void SetPositionImmediately(Vector2 vec)
     {
-        _onSwipeEvent.Invoke(Vector2Int.up, Vector2Int.zero);
+        transform.localPosition = vec;
+    }
+
+    public void SetParent(Transform parent)
+    {
+        transform.SetParent(parent);
     }
     
     public void SetSwipeEvent(Action<Vector2Int, Vector2Int> evnt)
@@ -44,14 +50,9 @@ public class Tile : MonoBehaviour
 
     public void SetTileInteractableEvent(TileInteractableEvent evnt)
     {
-        evnt.AddListener(SetTileInteractable);
+        evnt.AddListener(OnTileInteractableEvent);
     }
-
-    public void SetPositionImmediately(Vector2 vec)
-    {
-        transform.localPosition = vec;
-    }
-
+    
     private void OnStartSwipeEvent()
     {
         _isInteractable = false;
@@ -62,8 +63,14 @@ public class Tile : MonoBehaviour
         _isInteractable = true;
     }
 
-    private void SetTileInteractable(bool state)
+    private void OnTileInteractableEvent(bool state)
     {
         _isInteractable = state;
+    }
+
+    [ContextMenu("Swipe")]
+    private void Test_Swipe()
+    {
+        _onSwipeEvent.Invoke(pos, targetPos);
     }
 }

@@ -17,8 +17,13 @@ public class BoardManager : MonoBehaviour
     private TileInteractableEvent OnTileInteractableEvent { get; set; } = new TileInteractableEvent();
 
     private LevelData _currentLevel;
-    private TileBackground[,] _allTileBackgrounds; 
-        
+    private TileBackground[,] _allTileBackgrounds;
+
+    [SerializeField] private TileBackground currentTileBackground;
+    [SerializeField] private TileBackground targetTileBackground;
+    [SerializeField] private Tile currentTile;
+    [SerializeField] private Tile targetTile;
+    
     private void Awake()
     {
         _instance = this;
@@ -26,15 +31,26 @@ public class BoardManager : MonoBehaviour
 
     private void SwipeTiles(Vector2Int current, Vector2Int target)
     {
+        Debug.Log("Start SwipeTiles");
         OnSwipeStartEvent.Invoke();
         
-        Tile currentTile = GetTileBackground(current).GetTile();
-        Tile targetTile = GetTileBackground(target).GetTile();
-
-        _allTileBackgrounds[current.x, current.y].SetTile(targetTile, target);
-        _allTileBackgrounds[target.x, target.y].SetTile(currentTile, current);
+        currentTileBackground = GetTileBackground(current);
+        targetTileBackground = GetTileBackground(target);
         
+        currentTile = currentTileBackground.GetTile();
+        targetTile = targetTileBackground.GetTile();
+
+        currentTileBackground.SetTile(targetTile, target);
+        targetTileBackground.SetTile(currentTile, current);
+        
+        currentTile.SetParent(targetTileBackground.transform);
+        targetTile.SetParent(currentTileBackground.transform);
+        
+        currentTile.SetPositionImmediately(Vector2.zero);
+        targetTile.SetPositionImmediately(Vector2.zero);
+
         OnSwipeEndEvent.Invoke();
+        Debug.Log("End SwipeTiles");
     }
     
     private void CreateBoard(int width, int height)
