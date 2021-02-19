@@ -5,14 +5,38 @@ using UnityEngine;
 
 public class LevelLoader : MonoBehaviour
 {
+    private readonly LevelData _blankLevelData = new LevelData(-1, -1, -1, -1, new CellType[0,0]);
+    private static LevelLoader _instance;
+    
     private const string LevelPath = "Levels/RM_A{0}";
     private List<LevelData> _levels = new List<LevelData>();
+
+    public static LevelLoader Instance
+    {
+        get
+        {
+            return _instance;
+        }
+    }
     
     private void Awake()
+    {
+        _instance = this;
+    }
+
+    private void Start()
     {
         LoadFirst10Level();
     }
 
+    public LevelData GetLevelAtIndex(int index)
+    {
+        if (index < 0 || index >= _levels.Count)
+            return _blankLevelData;
+
+        return _levels[index];
+    }
+    
     private void LoadFirst10Level()
     {
         string path = "";
@@ -30,7 +54,7 @@ public class LevelLoader : MonoBehaviour
         int width = 0;
         int height = 0;
         int move = 0;
-        CellType[,] grid = new CellType[1,1];
+        CellType[,] grid = new CellType[0,0];
 
         foreach (var line in lines)
         {
@@ -101,7 +125,7 @@ public class LevelLoader : MonoBehaviour
 public struct LevelData
 {
     public int LevelNumber { get; private set; }
-    public int Width { get; private set; }
+    public int Width { get; private set; } 
     public int Height { get; private set; }
     public int MoveCount { get; private set; }
     public CellType[,] Grid { get; private set; }
@@ -136,9 +160,9 @@ public struct LevelData
 
 public enum CellType
 {
+    None = -1,
     Red = 0,
     Green = 1,
     Blue = 2,
     Yellow = 3,
-    None = 4,
 }
