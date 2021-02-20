@@ -134,10 +134,15 @@ public class BoardManager : MonoBehaviour
             for (int x = 0; x < width; x++ )
             {
                 Vector2 pos = new Vector2(startPos.x + (offset.x * x), startPos.y + (offset.y * y));
-                TileBackground instantiated = Instantiate(tileBackgroundPrefab, pos, tileBackgroundPrefab.transform.rotation, transform);
-                Tile tile = InstantiateTile(_currentLevel.Grid[x, y], instantiated.transform);
+                TileBackground instantiated =
+                    PoolManager.Instance.GetPooledObjectByTag<TileBackground>(tileBackgroundPrefab.tag);
+                Tile tile = GetTileFromPool(_currentLevel.Grid[x, y], instantiated.transform);
+                tile.SetArrayIndex(x, y);
+                
+                instantiated.transform.position = pos;
+                instantiated.transform.localScale = tileBackgroundPrefab.transform.localScale;
+                instantiated.transform.SetParent(transform);
                 instantiated.SetTile(tile);
-                instantiated.SetTileArrayIndex(x, y);
                 _allTileBackgrounds[x, y] = instantiated;
             }
         }
@@ -164,13 +169,16 @@ public class BoardManager : MonoBehaviour
         return _allTileBackgrounds[index.x, index.y];
     }
 
-    private Tile InstantiateTile(CellType type, Transform parent)
+    private Tile GetTileFromPool(CellType type, Transform parent)
     {
-        Tile instantiated = Instantiate(tilePrefab, new Vector2(0,0), Quaternion.identity, parent); 
+        Tile instantiated = PoolManager.Instance.GetPooledObjectByTag<Tile>(tilePrefab.tag);
+        instantiated.transform.SetParent(parent);
+        instantiated.transform.localScale = tilePrefab.transform.localScale;
         instantiated.SetType(type);
         instantiated.SetColor(GetColorByType(type));
         instantiated.SetCompleted(false);
         instantiated.SetPositionImmediately(new Vector2(0, 0));
+        
         instantiated.SetSwipeStartEvent(OnSwipeStartEvent);
         instantiated.SetSwipeEndEvent(OnSwipeEndEvent);
         instantiated.SetTileInteractableEvent(OnTileInteractableChangedEvent);

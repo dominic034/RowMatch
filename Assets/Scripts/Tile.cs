@@ -48,7 +48,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         transform.localPosition = vec;
     }
-
+    
     public void DoMove(float time)
     {
         transform.DOLocalMove(Vector3.zero, time);

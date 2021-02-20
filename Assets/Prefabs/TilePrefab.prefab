@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8491466517054879718}
   m_Layer: 0
   m_Name: TilePrefab
-  m_TagString: Untagged
+  m_TagString: Tile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,6 +100,8 @@ MonoBehaviour:
   pos: {x: 0, y: 0}
   targetPos: {x: 0, y: 0}
   spriteRenderer: {fileID: 4977594237988328449}
+  _isInteractable: 0
+  _isCompleted: 0
 --- !u!61 &8491466517054879718
 BoxCollider2D:
   m_ObjectHideFlags: 0
