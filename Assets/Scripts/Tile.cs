@@ -40,6 +40,11 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         transform.SetParent(parent);
     }
+
+    public CellType GetTileType()
+    {
+        return type;
+    }
     #endregion PUBLIC
 
     #region ADD EVENTS

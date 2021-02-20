@@ -38,8 +38,8 @@ public class BoardManager : MonoBehaviour
         // Debug.Log("Start SwipeTiles");
         OnSwipeStartEvent.Invoke();
         
-        currentTileBackground = GetTileBackground(current);
-        targetTileBackground = GetTileBackground(target);
+        currentTileBackground = GetTileBackgroundAtIndex(current);
+        targetTileBackground = GetTileBackgroundAtIndex(target);
         
         if(currentTileBackground == null || targetTileBackground == null)
         {
@@ -63,7 +63,51 @@ public class BoardManager : MonoBehaviour
         targetTile.SetPositionImmediately(Vector2.zero);
 
         OnSwipeEndEvent.Invoke();
+        EvaluateSwipe(current, target);
         // Debug.Log("End SwipeTiles");
+    }
+
+    private void EvaluateSwipe(Vector2Int current, Vector2Int target)
+    {
+        if (IsRowCompleted(current.y))
+            UpdateCompletedRow(current.y);
+        
+        if(current.y == target.y)
+            return;
+
+        if(IsRowCompleted(target.y))
+            UpdateCompletedRow(target.y);
+    }
+
+    private bool IsRowCompleted(int y)
+    {
+        bool isCompleted = false;
+        Vector2Int cursor = new Vector2Int(0, y);
+        Tile firstColumn = GetTileBackgroundAtIndex(cursor).GetTile();
+        for (int i = 1; i < _currentLevel.Width; i++)
+        {
+            cursor.x = i;
+            Tile currentTile = GetTileBackgroundAtIndex(cursor).GetTile();
+            if (firstColumn.GetTileType() != currentTile.GetTileType())
+            {
+                isCompleted = false;
+                break;
+            }
+            
+            isCompleted = true;
+        }
+        
+        return isCompleted;
+    }
+    
+    private void UpdateCompletedRow(int y)
+    {
+        Vector2Int cursor = new Vector2Int(0, y);
+        for (int i = 0; i < _currentLevel.Width; i++)
+        {
+            cursor.x = i;
+            GetTileBackgroundAtIndex(cursor).GetTile().SetColor(tickColor);
+        }
     }
     
     private void CreateBoard(int width, int height)
@@ -98,13 +142,13 @@ public class BoardManager : MonoBehaviour
         transform.position = new Vector3(current.x - x, current.y - y, 0);
     }
 
-    private TileBackground GetTileBackground(Vector2Int pos)
+    private TileBackground GetTileBackgroundAtIndex(Vector2Int index)
     {
-        if (pos.x >= _allTileBackgrounds.GetLength(0) || pos.x < 0 || 
-            pos.y >= _allTileBackgrounds.GetLength(1) || pos.y < 0)
+        if (index.x >= _allTileBackgrounds.GetLength(0) || index.x < 0 || 
+            index.y >= _allTileBackgrounds.GetLength(1) || index.y < 0)
             return null;
 
-        return _allTileBackgrounds[pos.x, pos.y];
+        return _allTileBackgrounds[index.x, index.y];
     }
 
     private Tile InstantiateTile(CellType type, Transform parent)
