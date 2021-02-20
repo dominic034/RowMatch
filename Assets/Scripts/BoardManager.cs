@@ -37,10 +37,11 @@ public class BoardManager : MonoBehaviour
     {
         // Debug.Log("Start SwipeTiles");
         OnSwipeStartEvent.Invoke();
+        OnTileInteractableEvent.Invoke(false);
         
         currentTileBackground = GetTileBackgroundAtIndex(current);
         targetTileBackground = GetTileBackgroundAtIndex(target);
-        
+
         if(currentTileBackground == null || targetTileBackground == null)
         {
             OnSwipeEndEvent.Invoke();
@@ -50,6 +51,9 @@ public class BoardManager : MonoBehaviour
         currentTile = currentTileBackground.GetTile();
         targetTile = targetTileBackground.GetTile();
 
+        if(targetTile.IsCompleted)
+            return;
+        
         currentTileBackground.SetTile(targetTile);
         targetTileBackground.SetTile(currentTile);
         
@@ -64,6 +68,7 @@ public class BoardManager : MonoBehaviour
 
         OnSwipeEndEvent.Invoke();
         EvaluateSwipe(current, target);
+        OnTileInteractableEvent.Invoke(true);
         // Debug.Log("End SwipeTiles");
     }
 
@@ -106,7 +111,9 @@ public class BoardManager : MonoBehaviour
         for (int i = 0; i < _currentLevel.Width; i++)
         {
             cursor.x = i;
-            GetTileBackgroundAtIndex(cursor).GetTile().SetColor(tickColor);
+            Tile tile = GetTileBackgroundAtIndex(cursor).GetTile();
+            tile.SetColor(tickColor);
+            tile.SetCompleted(true);
         }
     }
     
@@ -156,6 +163,7 @@ public class BoardManager : MonoBehaviour
         Tile instantiated = Instantiate(tilePrefab, new Vector2(0,0), Quaternion.identity, parent); 
         instantiated.SetType(type);
         instantiated.SetColor(GetColorByType(type));
+        instantiated.SetCompleted(false);
         instantiated.SetPositionImmediately(new Vector2(0, 0));
         instantiated.SetSwipeStartEvent(OnSwipeStartEvent);
         instantiated.SetSwipeEndEvent(OnSwipeEndEvent);

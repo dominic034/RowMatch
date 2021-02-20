@@ -10,10 +10,16 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     [SerializeField] private Vector2Int targetPos;
     [SerializeField] private SpriteRenderer spriteRenderer;
     
-    private bool _isInteractable = false;
+    [SerializeField] private bool _isInteractable = false;
+    [SerializeField] private bool _isCompleted = false;
     private Action<Vector2Int, Vector2Int> _onSwipeEvent;
     private Vector3 _initialMousePos = Vector3.zero;
 
+    public bool IsCompleted
+    {
+        get { return _isCompleted; }
+    }
+    
     #region PUBLIC
     public void SetType(CellType type)
     {
@@ -23,6 +29,12 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     public void SetColor(Color clr)
     {
         spriteRenderer.color = clr;
+    }
+
+    public void SetCompleted(bool state)
+    {
+        _isCompleted = state;
+        _isInteractable = !state;
     }
     
     public void SetArrayIndex(int x, int y)
@@ -62,28 +74,29 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         end.AddListener(OnEndSwipeEvent);
     }
-    #endregion ADD EVENTS
-
-    #region EVENTS
+    
     public void SetTileInteractableEvent(TileInteractableEvent evnt)
     {
         evnt.AddListener(OnTileInteractableEvent);
-    }
-    
+    }    
+    #endregion ADD EVENTS
+
+    #region EVENTS
     private void OnStartSwipeEvent()
     {
-        _isInteractable = false;
     }
 
     private void OnEndSwipeEvent()
     {
-        _isInteractable = true;
         targetPos = Vector2Int.zero;
         _initialMousePos = Vector3.zero;
     }
 
     private void OnTileInteractableEvent(bool state)
     {
+        if(_isCompleted)
+            return;
+        
         _isInteractable = state;
     }
     #endregion EVENTS
@@ -91,10 +104,15 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     #region DRAG CONTROL
     public void OnDrag(PointerEventData eventData)
     {
+        if(!_isInteractable)
+            return;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if(!_isInteractable)
+            return;
+        
         targetPos = Vector2Int.zero;
         _initialMousePos = Input.mousePosition;
         // Debug.Log("BEGIN DRAG : " + _initialMousePos);
@@ -102,6 +120,9 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if(!_isInteractable)
+            return;
+        
         targetPos = Vector2Int.zero;
         Vector3 finalMousePos = Input.mousePosition;
         SwipeDirection direction = SwipeDirection.None;
