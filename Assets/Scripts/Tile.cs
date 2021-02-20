@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -47,6 +48,11 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         transform.localPosition = vec;
     }
+
+    public void DoMove(float time)
+    {
+        transform.DOLocalMove(Vector3.zero, time);
+    }
     
     public void SetParent(Transform parent)
     {
@@ -75,7 +81,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         end.AddListener(OnEndSwipeEvent);
     }
     
-    public void SetTileInteractableEvent(TileInteractableEvent evnt)
+    public void SetTileInteractableEvent(TileInteractableChangedEvent evnt)
     {
         evnt.AddListener(OnTileInteractableEvent);
     }    
@@ -131,7 +137,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         float distance =
             Vector3.Distance(ScreenToWorldPosition(finalMousePos), ScreenToWorldPosition(_initialMousePos));
         // Debug.Log("DISTANCE: " + distance);
-        if(distance < transform.localScale.x * .5f)
+        if(distance < transform.localScale.x * .25f)
         {
             // Debug.Log("DIRECTION : " + direction);
             return;

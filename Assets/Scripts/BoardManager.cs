@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,6 +12,7 @@ public class BoardManager : MonoBehaviour
     
     [SerializeField] private TileBackground tileBackgroundPrefab;
     [SerializeField] private Tile tilePrefab;
+    [SerializeField] private float tweenTime = .5f;
     [SerializeField] private TileBackground currentTileBackground;
     [SerializeField] private TileBackground targetTileBackground;
     [SerializeField] private Tile currentTile;
@@ -22,11 +24,12 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private Color tickColor;
     
     private LevelData _currentLevel;
+    private Coroutine _swipeCoroutine;
     private TileBackground[,] _allTileBackgrounds;
 
     private SwipeStartEvent OnSwipeStartEvent { get; set; } = new SwipeStartEvent();
     private SwipeEndEvent OnSwipeEndEvent { get; set; } = new SwipeEndEvent();
-    private TileInteractableEvent OnTileInteractableEvent { get; set; } = new TileInteractableEvent();
+    private TileInteractableChangedEvent OnTileInteractableChangedEvent { get; set; } = new TileInteractableChangedEvent();
     
     private void Awake()
     {
@@ -35,9 +38,8 @@ public class BoardManager : MonoBehaviour
 
     private void SwipeTiles(Vector2Int current, Vector2Int target)
     {
-        // Debug.Log("Start SwipeTiles");
         OnSwipeStartEvent.Invoke();
-        OnTileInteractableEvent.Invoke(false);
+        OnTileInteractableChangedEvent.Invoke(false);
         
         currentTileBackground = GetTileBackgroundAtIndex(current);
         targetTileBackground = GetTileBackgroundAtIndex(target);
@@ -63,15 +65,19 @@ public class BoardManager : MonoBehaviour
         currentTile.SetParent(targetTileBackground.transform);
         targetTile.SetParent(currentTileBackground.transform);
         
-        currentTile.SetPositionImmediately(Vector2.zero);
-        targetTile.SetPositionImmediately(Vector2.zero);
-
-        OnSwipeEndEvent.Invoke();
-        EvaluateSwipe(current, target);
-        OnTileInteractableEvent.Invoke(true);
-        // Debug.Log("End SwipeTiles");
+        currentTile.DoMove(tweenTime);
+        targetTile.DoMove(tweenTime);
+        _swipeCoroutine = StartCoroutine(WaitForSwipe(tweenTime * 1.05f));
+        
+        IEnumerator WaitForSwipe(float time)
+        {
+            yield return new WaitForSeconds(time);
+            OnSwipeEndEvent.Invoke();
+            EvaluateSwipe(current, target);
+            OnTileInteractableChangedEvent.Invoke(true);
+        }
     }
-
+    
     private void EvaluateSwipe(Vector2Int current, Vector2Int target)
     {
         if (IsRowCompleted(current.y))
@@ -167,7 +173,7 @@ public class BoardManager : MonoBehaviour
         instantiated.SetPositionImmediately(new Vector2(0, 0));
         instantiated.SetSwipeStartEvent(OnSwipeStartEvent);
         instantiated.SetSwipeEndEvent(OnSwipeEndEvent);
-        instantiated.SetTileInteractableEvent(OnTileInteractableEvent);
+        instantiated.SetTileInteractableEvent(OnTileInteractableChangedEvent);
         instantiated.SetSwipeEvent(SwipeTiles);
         return instantiated;
     }
@@ -187,6 +193,11 @@ public class BoardManager : MonoBehaviour
             default:
                 return Color.white;
         }
+    }
+
+    private void ResetBoard()
+    {
+        
     }
     
     [ContextMenu("StartFirstLevel")]
@@ -210,7 +221,7 @@ public class SwipeEndEvent : UnityEvent
     
 }
 
-public class TileInteractableEvent : UnityEvent<bool>
+public class TileInteractableChangedEvent : UnityEvent<bool>
 {
     
 }
