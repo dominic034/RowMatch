@@ -33,4 +33,17 @@ public class TileBackground : MonoBehaviour
     {
         return tile;
     }
+
+    public void SetResetTileBackgroundEvent(ResetTileBackgroundEvent evnt)
+    {
+        evnt.AddListener(OnResetTileBackground);
+    }
+
+    private void OnResetTileBackground()
+    {
+        tile.Reset();
+        tile = null;
+        
+        PoolManager.Instance.GiveObjectToPool(gameObject);
+    }
 }

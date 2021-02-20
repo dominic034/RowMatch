@@ -30,6 +30,7 @@ public class BoardManager : MonoBehaviour
     private SwipeStartEvent OnSwipeStartEvent { get; set; } = new SwipeStartEvent();
     private SwipeEndEvent OnSwipeEndEvent { get; set; } = new SwipeEndEvent();
     private TileInteractableChangedEvent OnTileInteractableChangedEvent { get; set; } = new TileInteractableChangedEvent();
+    private ResetTileBackgroundEvent OnResetTileBackgroundEvent { get; set; } = new ResetTileBackgroundEvent();
     
     private void Awake()
     {
@@ -142,6 +143,7 @@ public class BoardManager : MonoBehaviour
                 instantiated.transform.position = pos;
                 instantiated.transform.localScale = tileBackgroundPrefab.transform.localScale;
                 instantiated.transform.SetParent(transform);
+                instantiated.SetResetTileBackgroundEvent(OnResetTileBackgroundEvent);
                 instantiated.SetTile(tile);
                 _allTileBackgrounds[x, y] = instantiated;
             }
@@ -203,12 +205,20 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    private void ResetBoard()
+    private void UnLoadLevel()
     {
+        transform.position = Vector3.zero;
         
+        OnResetTileBackgroundEvent.Invoke();
+        
+        OnSwipeEndEvent.RemoveAllListeners();
+        OnSwipeStartEvent.RemoveAllListeners();
+        OnTileInteractableChangedEvent.RemoveAllListeners();
+        OnResetTileBackgroundEvent.RemoveAllListeners();
+        StopAllCoroutines();
     }
     
-    [ContextMenu("StartFirstLevel")]
+    [ContextMenu("Load FirstLevel")]
     private void StartFirstLevel()
     {
         _currentLevel = LevelLoader.Instance.GetLevelAtIndex(0);
@@ -216,6 +226,12 @@ public class BoardManager : MonoBehaviour
             return;
         
         CreateBoard(_currentLevel.Width, _currentLevel.Height);
+    }
+
+    [ContextMenu("UnLoad Level")]
+    private void TEST_Reset()
+    {
+        UnLoadLevel();        
     }
 }
 
@@ -230,6 +246,11 @@ public class SwipeEndEvent : UnityEvent
 }
 
 public class TileInteractableChangedEvent : UnityEvent<bool>
+{
+    
+}
+
+public class ResetTileBackgroundEvent : UnityEvent
 {
     
 }

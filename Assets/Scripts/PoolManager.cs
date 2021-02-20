@@ -50,6 +50,8 @@ public class PoolManager : MonoBehaviour
             return;
         
         obj.SetActive(false);
+        obj.transform.SetParent(transform);
+        obj.transform.position = Vector3.zero;
         _objectsPool[obj.tag].Enqueue(obj);
     }
 

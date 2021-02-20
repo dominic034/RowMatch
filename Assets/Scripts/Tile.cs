@@ -63,6 +63,16 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         return type;
     }
+
+    public void Reset()
+    {
+        _isCompleted = false;
+        _isInteractable = false;
+        _onSwipeEvent = null;
+        type = CellType.None;
+        
+        PoolManager.Instance.GiveObjectToPool(gameObject);
+    }
     #endregion PUBLIC
 
     #region ADD EVENTS
