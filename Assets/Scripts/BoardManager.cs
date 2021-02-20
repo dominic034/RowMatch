@@ -10,21 +10,36 @@ public class BoardManager : MonoBehaviour
         get { return _instance; }
     }
     
+    [Header("Prefabs")]
     [SerializeField] private TileBackground tileBackgroundPrefab;
     [SerializeField] private Tile tilePrefab;
+    
+    [Header("Info")]
     [SerializeField] private float tweenTime = .5f;
+    [SerializeField] private int moveCount;
+    [SerializeField] private int totalPoints;
+
     [SerializeField] private TileBackground currentTileBackground;
     [SerializeField] private TileBackground targetTileBackground;
     [SerializeField] private Tile currentTile;
     [SerializeField] private Tile targetTile;
+    
+    [Header("Colors")]
     [SerializeField] private Color redColor;
     [SerializeField] private Color blueColor;
     [SerializeField] private Color greenColor;
     [SerializeField] private Color yellowColor;
     [SerializeField] private Color tickColor;
+
+    [Header("Points")]
+    [SerializeField] private int redPoints;
+    [SerializeField] private int greenPoints;
+    [SerializeField] private int bluePoints;
+    [SerializeField] private int yellowPoints;
     
     private LevelData _currentLevel;
     private Coroutine _swipeCoroutine;
+    private CellType _lastCompletedType;
     private TileBackground[,] _allTileBackgrounds;
 
     private SwipeStartEvent OnSwipeStartEvent { get; set; } = new SwipeStartEvent();
@@ -69,26 +84,33 @@ public class BoardManager : MonoBehaviour
         currentTile.DoMove(tweenTime);
         targetTile.DoMove(tweenTime);
         _swipeCoroutine = StartCoroutine(WaitForSwipe(tweenTime * 1.05f));
-        
+
         IEnumerator WaitForSwipe(float time)
         {
             yield return new WaitForSeconds(time);
+            moveCount -= 1;
             OnSwipeEndEvent.Invoke();
             EvaluateSwipe(current, target);
-            OnTileInteractableChangedEvent.Invoke(true);
+            OnTileInteractableChangedEvent.Invoke(moveCount != 0);
         }
     }
     
     private void EvaluateSwipe(Vector2Int current, Vector2Int target)
     {
         if (IsRowCompleted(current.y))
+        {
             UpdateCompletedRow(current.y);
+            UpdateTotalPoints();
+        }
         
         if(current.y == target.y)
             return;
 
         if(IsRowCompleted(target.y))
+        {
             UpdateCompletedRow(target.y);
+            UpdateTotalPoints();
+        }
     }
 
     private bool IsRowCompleted(int y)
@@ -108,7 +130,8 @@ public class BoardManager : MonoBehaviour
             
             isCompleted = true;
         }
-        
+
+        _lastCompletedType = firstColumn.GetTileType();
         return isCompleted;
     }
     
@@ -122,6 +145,34 @@ public class BoardManager : MonoBehaviour
             tile.SetColor(tickColor);
             tile.SetCompleted(true);
         }
+    }
+
+    private void UpdateTotalPoints()
+    {
+        switch (_lastCompletedType)
+        {
+            case CellType.Blue:
+                totalPoints += bluePoints;
+                break;
+            case CellType.Red:
+                totalPoints += redPoints;
+                break;
+            case CellType.Green:
+                totalPoints += greenPoints;
+                break;
+            case CellType.Yellow:
+                totalPoints += yellowPoints;
+                break;
+            default:
+                totalPoints += 0;
+                break;
+        }
+    }
+
+    private void LoadLevel()
+    {
+        moveCount = _currentLevel.MoveCount;
+        CreateBoard(_currentLevel.Width, _currentLevel.Height);
     }
     
     private void CreateBoard(int width, int height)
@@ -225,7 +276,7 @@ public class BoardManager : MonoBehaviour
         if(_currentLevel.LevelNumber <= 0)
             return;
         
-        CreateBoard(_currentLevel.Width, _currentLevel.Height);
+        LoadLevel();
     }
 
     [ContextMenu("UnLoad Level")]
