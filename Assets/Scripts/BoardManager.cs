@@ -30,7 +30,6 @@ public class BoardManager : MonoBehaviour
 
     private Tile _currentTile;
     private Tile _targetTile;
-    
     private LevelData _currentLevel;
     private CellType _lastCompletedType;
     private TileBackground[,] _allTileBackgrounds;

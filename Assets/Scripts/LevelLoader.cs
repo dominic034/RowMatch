@@ -81,7 +81,7 @@ public class LevelLoader : MonoBehaviour
         }
 
         LevelData levelData = new LevelData(level, width, height, move, grid); 
-        Debug.Log(levelData);
+        // Debug.Log(levelData);
         _levels.Add(levelData);
     }
 
