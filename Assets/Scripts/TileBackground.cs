@@ -14,16 +14,6 @@ public class TileBackground : MonoBehaviour
         }
     }
 
-    public void SetTileArrayIndex(Vector2Int pos)
-    {
-       SetTileArrayIndex(pos.x, pos.y);
-    }
-
-    public void SetTileArrayIndex(int x, int y)
-    {
-        tile.SetArrayIndex(x, y);
-    }
-    
     public void SetTile(Tile tile)
     {
         this.tile = tile;

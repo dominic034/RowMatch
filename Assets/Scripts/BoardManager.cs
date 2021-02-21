@@ -38,8 +38,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private int yellowPoints;
     
     private LevelData _currentLevel;
-    private Coroutine _swipeCoroutine;
     private CellType _lastCompletedType;
+    private Vector2Int _currentIndex;
+    private Vector2Int _targetIndex;
     private TileBackground[,] _allTileBackgrounds;
 
     private SwipeStartEvent OnSwipeStartEvent { get; set; } = new SwipeStartEvent();
@@ -52,47 +53,85 @@ public class BoardManager : MonoBehaviour
         _instance = this;
     }
 
+    private void LoadLevel()
+    {
+        OnSwipeStartEvent.AddListener(OnSwipeStart);
+        OnSwipeEndEvent.AddListener(OnSwipeEnd);
+        
+        moveCount = _currentLevel.MoveCount;
+        CreateBoard(_currentLevel.Width, _currentLevel.Height);
+    } 
+    
+    private void UnLoadLevel()
+    {
+        moveCount = 0;
+        totalPoints = 0;
+        
+        transform.position = Vector3.zero;
+        
+        OnResetTileBackgroundEvent.Invoke();
+        
+        OnSwipeEndEvent.RemoveAllListeners();
+        OnSwipeStartEvent.RemoveAllListeners();
+        OnTileInteractableChangedEvent.RemoveAllListeners();
+        OnResetTileBackgroundEvent.RemoveAllListeners();
+        StopAllCoroutines();
+    }
+    
+    #region SWIPE
+
+    private void OnSwipeStart()
+    {
+        OnTileInteractableChangedEvent.Invoke(false);
+    }
+
+    private void OnSwipeEnd()
+    {
+        moveCount -= 1;
+        EvaluateSwipe(_currentIndex, _targetIndex);
+        OnTileInteractableChangedEvent.Invoke(moveCount != 0);
+
+        if (moveCount == 0)
+        {
+            Debug.Log("Level is done, and your points: " + totalPoints);
+        }
+    }
+    
     private void SwipeTiles(Vector2Int current, Vector2Int target)
     {
-        OnSwipeStartEvent.Invoke();
-        OnTileInteractableChangedEvent.Invoke(false);
-        
         currentTileBackground = GetTileBackgroundAtIndex(current);
         targetTileBackground = GetTileBackgroundAtIndex(target);
 
         if(currentTileBackground == null || targetTileBackground == null)
-        {
-            OnSwipeEndEvent.Invoke();
             return;
-        }
         
         currentTile = currentTileBackground.GetTile();
         targetTile = targetTileBackground.GetTile();
 
         if(targetTile.IsCompleted)
             return;
+
+        _currentIndex = current;
+        _targetIndex = target;
         
+        OnSwipeStartEvent.Invoke();
         currentTileBackground.SetTile(targetTile);
         targetTileBackground.SetTile(currentTile);
-        
-        currentTileBackground.SetTileArrayIndex(current);
-        targetTileBackground.SetTileArrayIndex(target);
-        
+
+        currentTile.SetArrayIndex(target.x, target.y);
+        targetTile.SetArrayIndex(current.x, current.y);
         currentTile.SetParent(targetTileBackground.transform);
         targetTile.SetParent(currentTileBackground.transform);
         
         currentTile.DoMove(tweenTime);
         targetTile.DoMove(tweenTime);
-        _swipeCoroutine = StartCoroutine(WaitForSwipe(tweenTime * 1.05f));
+        StartCoroutine(WaitForSwipe(tweenTime * 1.05f));
+    }
 
-        IEnumerator WaitForSwipe(float time)
-        {
-            yield return new WaitForSeconds(time);
-            moveCount -= 1;
-            OnSwipeEndEvent.Invoke();
-            EvaluateSwipe(current, target);
-            OnTileInteractableChangedEvent.Invoke(moveCount != 0);
-        }
+    private IEnumerator WaitForSwipe(float time)
+    {
+        yield return new WaitForSeconds(time);
+        OnSwipeEndEvent.Invoke();
     }
     
     private void EvaluateSwipe(Vector2Int current, Vector2Int target)
@@ -168,13 +207,9 @@ public class BoardManager : MonoBehaviour
                 break;
         }
     }
-
-    private void LoadLevel()
-    {
-        moveCount = _currentLevel.MoveCount;
-        CreateBoard(_currentLevel.Width, _currentLevel.Height);
-    }
+    #endregion SWIPE
     
+    #region CREATE BOARD
     private void CreateBoard(int width, int height)
     {
         _allTileBackgrounds = new TileBackground[width, height];
@@ -255,20 +290,9 @@ public class BoardManager : MonoBehaviour
                 return Color.white;
         }
     }
+    #endregion CREATE BOARD
 
-    private void UnLoadLevel()
-    {
-        transform.position = Vector3.zero;
-        
-        OnResetTileBackgroundEvent.Invoke();
-        
-        OnSwipeEndEvent.RemoveAllListeners();
-        OnSwipeStartEvent.RemoveAllListeners();
-        OnTileInteractableChangedEvent.RemoveAllListeners();
-        OnResetTileBackgroundEvent.RemoveAllListeners();
-        StopAllCoroutines();
-    }
-    
+    #region TEST
     [ContextMenu("Load FirstLevel")]
     private void StartFirstLevel()
     {
@@ -284,6 +308,7 @@ public class BoardManager : MonoBehaviour
     {
         UnLoadLevel();        
     }
+    #endregion TEST
 }
 
 public class SwipeStartEvent : UnityEvent
