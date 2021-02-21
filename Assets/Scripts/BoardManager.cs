@@ -4,11 +4,7 @@ using UnityEngine.Events;
 
 public class BoardManager : MonoBehaviour
 {
-    private static BoardManager _instance;
-    public static BoardManager Instance
-    {
-        get { return _instance; }
-    }
+    public static BoardManager Instance { get; private set; }
     
     [Header("Prefabs")]
     [SerializeField] private TileBackground tileBackgroundPrefab;
@@ -18,11 +14,6 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private float tweenTime = .5f;
     [SerializeField] private int moveCount;
     [SerializeField] private int totalPoints;
-
-    [SerializeField] private TileBackground currentTileBackground;
-    [SerializeField] private TileBackground targetTileBackground;
-    [SerializeField] private Tile currentTile;
-    [SerializeField] private Tile targetTile;
     
     [Header("Colors")]
     [SerializeField] private Color redColor;
@@ -36,11 +27,12 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private int greenPoints;
     [SerializeField] private int bluePoints;
     [SerializeField] private int yellowPoints;
+
+    private Tile _currentTile;
+    private Tile _targetTile;
     
     private LevelData _currentLevel;
     private CellType _lastCompletedType;
-    private Vector2Int _currentIndex;
-    private Vector2Int _targetIndex;
     private TileBackground[,] _allTileBackgrounds;
 
     private SwipeStartEvent OnSwipeStartEvent { get; set; } = new SwipeStartEvent();
@@ -50,7 +42,12 @@ public class BoardManager : MonoBehaviour
     
     private void Awake()
     {
-        _instance = this;
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
     }
 
     private void LoadLevel()
@@ -77,9 +74,13 @@ public class BoardManager : MonoBehaviour
         OnResetTileBackgroundEvent.RemoveAllListeners();
         StopAllCoroutines();
     }
+
+    private void OnLevelCompleted(CompleteType _)
+    {
+        UnLoadLevel();
+    }
     
     #region SWIPE
-
     private void OnSwipeStart()
     {
         OnTileInteractableChangedEvent.Invoke(false);
@@ -88,43 +89,41 @@ public class BoardManager : MonoBehaviour
     private void OnSwipeEnd()
     {
         moveCount -= 1;
-        EvaluateSwipe(_currentIndex, _targetIndex);
+        EvaluateSwipe(_currentTile.ArrayIndex, _targetTile.ArrayIndex);
         OnTileInteractableChangedEvent.Invoke(moveCount != 0);
 
         if (moveCount == 0)
         {
             Debug.Log("Level is done, and your points: " + totalPoints);
+            GameManager.Instance.CheckScore(totalPoints);
         }
     }
     
     private void SwipeTiles(Vector2Int current, Vector2Int target)
     {
-        currentTileBackground = GetTileBackgroundAtIndex(current);
-        targetTileBackground = GetTileBackgroundAtIndex(target);
+        TileBackground currentTileBackground = GetTileBackgroundAtIndex(current);
+        TileBackground targetTileBackground = GetTileBackgroundAtIndex(target);
 
         if(currentTileBackground == null || targetTileBackground == null)
             return;
         
-        currentTile = currentTileBackground.GetTile();
-        targetTile = targetTileBackground.GetTile();
+        _currentTile = currentTileBackground.GetTile();
+        _targetTile = targetTileBackground.GetTile();
 
-        if(targetTile.IsCompleted)
+        if(_targetTile.IsCompleted)
             return;
 
-        _currentIndex = current;
-        _targetIndex = target;
-        
         OnSwipeStartEvent.Invoke();
-        currentTileBackground.SetTile(targetTile);
-        targetTileBackground.SetTile(currentTile);
+        currentTileBackground.SetTile(_targetTile);
+        targetTileBackground.SetTile(_currentTile);
 
-        currentTile.SetArrayIndex(target.x, target.y);
-        targetTile.SetArrayIndex(current.x, current.y);
-        currentTile.SetParent(targetTileBackground.transform);
-        targetTile.SetParent(currentTileBackground.transform);
+        _currentTile.SetArrayIndex(target.x, target.y);
+        _targetTile.SetArrayIndex(current.x, current.y);
+        _currentTile.SetParent(targetTileBackground.transform);
+        _targetTile.SetParent(currentTileBackground.transform);
         
-        currentTile.DoMove(tweenTime);
-        targetTile.DoMove(tweenTime);
+        _currentTile.DoMove(tweenTime);
+        _targetTile.DoMove(tweenTime);
         StartCoroutine(WaitForSwipe(tweenTime * 1.05f));
     }
 
@@ -182,6 +181,7 @@ public class BoardManager : MonoBehaviour
             cursor.x = i;
             Tile tile = GetTileBackgroundAtIndex(cursor).GetTile();
             tile.SetColor(tickColor);
+            tile.DoDoneEffect();
             tile.SetCompleted(true);
         }
     }

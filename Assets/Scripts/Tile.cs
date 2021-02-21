@@ -7,15 +7,20 @@ using UnityEngine.EventSystems;
 public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
     [SerializeField] private CellType type;
-    [SerializeField] private Vector2Int pos;
-    [SerializeField] private Vector2Int targetPos;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Vector2Int index;
+    [SerializeField] private Vector2Int targetIndex;
     
     [SerializeField] private bool _isInteractable = false;
     [SerializeField] private bool _isCompleted = false;
     private Action<Vector2Int, Vector2Int> _onSwipeEvent;
     private Vector3 _initialMousePos = Vector3.zero;
-
+    
+    public Vector2Int ArrayIndex
+    {
+        get { return index; }
+    }
+    
     public bool IsCompleted
     {
         get { return _isCompleted; }
@@ -32,6 +37,18 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         spriteRenderer.color = clr;
     }
 
+    public void DoDoneEffect()
+    {
+        Sequence seq = DOTween.Sequence();
+        
+        Vector2 currentScale = transform.localScale;
+        Vector2 targetScale = new Vector2(currentScale.x * 1.15f, currentScale.y * 1.15f);
+        
+        seq.Append(transform.DOScale(targetScale, .1f));
+        seq.Append(transform.DOScale(currentScale, .5f));
+        seq.Play();
+    }
+
     public void SetCompleted(bool state)
     {
         _isCompleted = state;
@@ -40,8 +57,8 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     
     public void SetArrayIndex(int x, int y)
     {
-        pos.x = x;
-        pos.y = y;
+        index.x = x;
+        index.y = y;
     }
 
     public void SetPositionImmediately(Vector2 vec)
@@ -104,7 +121,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
     private void OnEndSwipeEvent()
     {
-        targetPos = Vector2Int.zero;
+        targetIndex = Vector2Int.zero;
         _initialMousePos = Vector3.zero;
     }
 
@@ -129,7 +146,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         if(!_isInteractable)
             return;
         
-        targetPos = Vector2Int.zero;
+        targetIndex = Vector2Int.zero;
         _initialMousePos = Input.mousePosition;
         // Debug.Log("BEGIN DRAG : " + _initialMousePos);
     }
@@ -139,7 +156,7 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         if(!_isInteractable)
             return;
         
-        targetPos = Vector2Int.zero;
+        targetIndex = Vector2Int.zero;
         Vector3 finalMousePos = Input.mousePosition;
         SwipeDirection direction = SwipeDirection.None;
         // Debug.Log("END DRAG : " + finalMousePos);
@@ -168,8 +185,8 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         }
         // Debug.Log("DIRECTION : " + direction);
 
-        targetPos = pos + GetDirectionPosition(direction);
-        _onSwipeEvent(pos, targetPos);
+        targetIndex = index + GetDirectionPosition(direction);
+        _onSwipeEvent(index, targetIndex);
     }
     #endregion DRAG CONTROL
     
@@ -205,11 +222,4 @@ public enum SwipeDirection
     Down,
     Left,
     Right
-}
-
-public enum MouseState
-{
-    None,
-    Down,
-    Up
 }
