@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -5,55 +6,61 @@ using UnityEngine.EventSystems;
 namespace UI
 {
     [RequireComponent(typeof(RectTransform), typeof(SpriteMask))]
-    public class VerticalScroller : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler
+    public class VerticalScroller : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
     {
         [SerializeField] private RectTransform viewPort;
-        private Vector2 _lastMousePosition;
+        private float _lastMousePos;
+        private float _beginingYPos;
 
-        private float _viewPortStartYPos;
+        private RectTransform RectTransform
+        {
+            get { return GetComponent<RectTransform>(); }
+        }
 
-        // private float ViewPortLocalYPosition
-        // {
-        //     get { return viewPort.transform.localPosition.y; }
-        // }
-        //
-        // private Vector2 GetMousePosition()
-        // {
-        //     return Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        // }
-
+        private bool IsScrollable
+        {
+            get { return viewPort.rect != RectTransform.rect; }
+        }
+        
         public void OnBeginDrag(PointerEventData eventData)
         {
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(viewPort, eventData.position,
-                eventData.pressEventCamera, out _lastMousePosition);
-            _viewPortStartYPos = viewPort.anchoredPosition.y;
+            _lastMousePos = GetScreenPosition();
+            _beginingYPos = viewPort.anchoredPosition.y;
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-
-
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            Vector2 localCursor;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(viewPort, eventData.position,
-                eventData.pressEventCamera, out localCursor); // GetMousePosition();
-
-            var pointerDelta = localCursor.y - _viewPortStartYPos;
-            float position = _viewPortStartYPos + pointerDelta;
-            viewPort.DOAnchorPosY(position, 0);
-
-            // Vector2 _dragPosition = GetMousePosition();
+            if (!IsScrollable)
+                return;
+            
+            var currPos = GetScreenPosition();
+            float difference =  currPos - _lastMousePos;
             //
-            // var resultY = _dragPosition.y - _lastMousePosition.y;
-            // viewPort.transform.DOLocalMoveY(ViewPortLocalYPosition + resultY, 0);
-            // _lastMousePosition = _dragPosition;
+            // if(Mathf.Abs(difference) < .1f)
+            //     return;
+
+            float position = _beginingYPos + difference;
+
+            if (position < 0)
+                position = 0;
+            
+            if (position > .88f)
+                position = .88f;
+
+            viewPort.anchoredPosition = new Vector2(0, position);
+            // viewPort.DOAnchorPosY(position, 0);
+
+            _lastMousePos = currPos;
+            _beginingYPos = viewPort.anchoredPosition.y;
         }
 
-        public void OnScroll(PointerEventData eventData)
+        private float GetScreenPosition()
         {
+            return Camera.main.ScreenToViewportPoint(Input.mousePosition).y;
         }
     }
 }
