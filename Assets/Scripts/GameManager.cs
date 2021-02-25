@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public PlayLevelButtonEvent OnPlayLevelButtonEvent { get; private set; } = new PlayLevelButtonEvent();
     public InitializeLevelEvent OnInitializeLevelEvent { get; private set; } = new InitializeLevelEvent();
     public LevelResultEvent OnLevelResultEvent { get; private set; } = new LevelResultEvent();
+    public UnityEvent OnReturnMainMenu { get; private set; } = new UnityEvent();
     
     private void Awake()
     {

@@ -16,6 +16,8 @@ public class MainMenu : MonoBehaviour
     {
         GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
         GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+        GameManager.Instance.OnReturnMainMenu.AddListener(OnReturnMainMenu);
+        GameManager.Instance.OnOpenLevelsPopUp.AddListener(OnOpenLevelsPopUp);
     }
 
     private void OnLevelCompleted(CompleteType type)
@@ -24,6 +26,16 @@ public class MainMenu : MonoBehaviour
             return;
         
         panel.SetActive(true); 
+    }
+
+    private void OnOpenLevelsPopUp()
+    {
+        panel.SetActive(false);
+    }
+
+    private void OnReturnMainMenu()
+    {
+        panel.SetActive(true);
     }
     
     private void OnClickedPlayLevel(int no)

@@ -100,7 +100,7 @@ public class BoardManager : MonoBehaviour
 
         if (moveCount == 0)
         {
-            Debug.Log("Level is done, and your points: " + totalPoints);
+            // Debug.Log("Level is done, and your points: " + totalPoints);
             GameManager.Instance.OnLevelResultEvent.Invoke(totalPoints, _currentLevel.LevelNumber);
         }
     }

@@ -175,7 +175,7 @@ public class LevelData
 
     public void ChangeLockStatus(bool state)
     {
-        Debug.Log($"{LevelNumber} staus changed");
+        // Debug.Log($"{LevelNumber} staus changed");
         IsLocked = state;
     }
 

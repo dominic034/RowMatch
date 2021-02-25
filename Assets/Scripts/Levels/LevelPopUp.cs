@@ -51,6 +51,7 @@ namespace Levels
 
         private void OnClickedExitButton()
         {
+            GameManager.Instance.OnReturnMainMenu.Invoke();
             panel.SetActive(false);
         }
     }
