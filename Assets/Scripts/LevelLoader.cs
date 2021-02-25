@@ -129,14 +129,28 @@ public struct LevelData
     public int Height { get; private set; }
     public int MoveCount { get; private set; }
     public CellType[,] Grid { get; private set; }
+    public bool IsLocked { get; private set; }
+    public int HighScore { get; private set; }
 
-    public LevelData(int levelNumber, int width, int height, int moveCount, CellType[,] grid)
+    public LevelData(int levelNumber, int width, int height, int moveCount, CellType[,] grid, bool isLocked = false, int highScore = 0)
     {
         LevelNumber = levelNumber;
         Width = width;
         Height = height;
         MoveCount = moveCount;
         Grid = grid;
+        IsLocked = isLocked;
+        HighScore = highScore;
+    }
+
+    public void ChangeLockStatus(bool state)
+    {
+        IsLocked = state;
+    }
+
+    public void SetHighScore(int highScore)
+    {
+        HighScore = highScore;
     }
 
     public override string ToString()

@@ -74,7 +74,7 @@ public class BoardManager : MonoBehaviour
         StopAllCoroutines();
     }
 
-    private void OnLevelCompleted(CompleteType _)
+    private void OnLevelCompleted(CompleteType _, int score)
     {
         UnLoadLevel();
     }

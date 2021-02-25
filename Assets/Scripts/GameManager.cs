@@ -12,19 +12,28 @@ public class GameManager : MonoBehaviour
     private int _highestScore;
     
     public LevelCompletedEvent OnLevelCompletedEvent { get; private set; } = new LevelCompletedEvent();
+    public UnityEvent OnOpenLevelsPopUp { get; private set; } = new UnityEvent();
     
     private void Awake()
     {
         Instance = this;
         _lastUnlockedLevel = PlayerPrefs.GetInt(LastUnlockedLevelPrefKey, 1);
         _highestScore = PlayerPrefs.GetInt(HighestScorePrefKey, 0);
+        
+        OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+    }
+
+    private void OnDestroy()
+    {
+        OnLevelCompletedEvent.RemoveAllListeners();
+        OnLevelCompletedEvent.RemoveAllListeners();
     }
 
     public void CheckScore(int score)
     {
         if (score <= _highestScore)
         {
-            OnLevelCompletedEvent.Invoke(CompleteType.None);
+            OnLevelCompletedEvent.Invoke(CompleteType.None, score);
             return;
         }
 
@@ -33,11 +42,19 @@ public class GameManager : MonoBehaviour
         
         PlayerPrefs.SetInt(HighestScorePrefKey, _highestScore);
         PlayerPrefs.SetInt(LastUnlockedLevelPrefKey, _lastUnlockedLevel);
-        OnLevelCompletedEvent.Invoke(CompleteType.NewScore);
+        OnLevelCompletedEvent.Invoke(CompleteType.NewScore, score);
+    }
+
+    private void OnLevelCompleted(CompleteType type, int score)
+    {
+        if(type == CompleteType.None)
+            return;
+        
+        OnOpenLevelsPopUp.Invoke();
     }
 }
 
-public class LevelCompletedEvent : UnityEvent<CompleteType>
+public class LevelCompletedEvent : UnityEvent<CompleteType, int>
 {
     
 }
