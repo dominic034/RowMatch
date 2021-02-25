@@ -36,6 +36,11 @@ public class LevelLoader : MonoBehaviour
 
         return _levels[index];
     }
+
+    public int GetLevelsCount()
+    {
+        return _levels.Count;
+    }
     
     private void LoadFirst10Level()
     {

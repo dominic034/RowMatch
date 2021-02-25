@@ -1,3 +1,4 @@
+using TMPro;
 using UI;
 using UnityEngine;
 
@@ -5,8 +6,8 @@ namespace Levels
 {
     public class LevelCell : ScrollerCell
     {
-        [SerializeField] private TextMesh headerText;
-        [SerializeField] private TextMesh highScore;
+        [SerializeField] private TextMeshPro headerText;
+        [SerializeField] private TextMeshPro highScore;
         [SerializeField] private SpriteButton playButton;
 
         private void Awake()

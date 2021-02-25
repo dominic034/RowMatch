@@ -31,12 +31,13 @@ namespace Levels
         
         private void OnOpenLevelsPopUp()
         {
-            
+            panel.SetActive(true);
+            verticalScroller.ReloadScroller(LevelLoader.Instance.GetLevelsCount());
         }
 
         private void OnClickedExitButton()
         {
-            gameObject.SetActive(false);
+            panel.SetActive(false);
         }
     }
 }

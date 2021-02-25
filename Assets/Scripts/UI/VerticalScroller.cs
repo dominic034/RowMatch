@@ -45,14 +45,11 @@ namespace UI
             get { return content.rect.height > RectTransform.rect.height;  }
         }
 
-        private void Awake()
-        {
-            InitializeContent();
-        }
-
         public void ReloadScroller(int dataCount)
         {
-            VerticalLayoutGroup.spacing = (space / transform.localScale.y) * .1f;
+            InitializeContent();
+            
+            VerticalLayoutGroup.spacing = (space * transform.localScale.y) * .1f;
             float cellHeight = .2f;
             float spacing = VerticalLayoutGroup.spacing;
             int totalCellCount = 10;
@@ -106,7 +103,8 @@ namespace UI
 
         private void InitializeContent()
         {
-            Destroy(content.gameObject);
+            if(content != null)
+                Destroy(content.gameObject);
             
             GameObject go = new GameObject("content", typeof(RectTransform));
             go.transform.SetParent(transform);
@@ -118,7 +116,9 @@ namespace UI
             content.pivot = _pivot;
             content.offsetMin = new Vector2(0, content.offsetMin.y);
             content.offsetMax = new Vector2(0, content.offsetMax.y);
-            content.anchoredPosition = Vector2.zero;
+            content.anchoredPosition3D = new Vector3(0,0, -1);
+            
+            VerticalLayoutGroup.childScaleHeight = true;
         }
     }
 }

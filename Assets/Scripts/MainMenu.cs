@@ -1,18 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
+using UI;
 using UnityEngine;
 
 public class MainMenu : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private SpriteButton levelsButton;
+
+    private void Awake()
     {
-        
+        levelsButton.OnClick.AddListener(OnClickedLevelsButton);    
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDestroy()
     {
-        
+        levelsButton.OnClick.RemoveAllListeners();
+    }
+
+    private void OnClickedLevelsButton()
+    {
+        GameManager.Instance.OnOpenLevelsPopUp.Invoke();
     }
 }
