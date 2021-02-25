@@ -31,7 +31,6 @@ namespace Levels
 
         public void OnClickedPlayButton()
         {
-            Debug.Log("Clicked: " + _levelNumber);
             GameManager.Instance.OnPlayLevelButtonEvent.Invoke(_levelNumber);
         }
 

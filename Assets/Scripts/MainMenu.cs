@@ -38,7 +38,6 @@ public class MainMenu : MonoBehaviour
 
     private void OnClickedLevelsButton()
     {
-        Debug.Log("main menu button");
         GameManager.Instance.OnOpenLevelsPopUp.Invoke();
     }
 }

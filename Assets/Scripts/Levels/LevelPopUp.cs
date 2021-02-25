@@ -1,3 +1,4 @@
+using System.Collections;
 using UI;
 using UnityEngine;
 
@@ -35,10 +36,16 @@ namespace Levels
             levelCell.SetView(LevelLoader.Instance.GetLevelAtIndex(index));
         }
         
+        [ContextMenu("Open")]
         private void OnOpenLevelsPopUp()
         {
-            Debug.Log("open");
             panel.SetActive(true);
+            StartCoroutine(Wait());
+        }
+
+        private IEnumerator Wait()
+        {
+            yield return new WaitForEndOfFrame();
             verticalScroller.ReloadScroller(LevelLoader.Instance.GetLevelsCount());
         }
 

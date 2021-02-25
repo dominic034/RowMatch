@@ -37,9 +37,11 @@ public class LevelLoader : MonoBehaviour
 
     private void OnLevelResult(int score, int currentLevel)
     {
-        PlayerPrefs.SetString(string.Format(LevelPrefKey, currentLevel), string.Format(LevelDataPrefValue, true.ToString(), score.ToString()));
-        _levels[currentLevel -1].ChangeLockStatus(true);
+        _levels[currentLevel].ChangeLockStatus(true);
         _levels[currentLevel -1].SetHighScore(score);
+        
+        PlayerPrefs.SetString(string.Format(LevelPrefKey, currentLevel), string.Format(LevelDataPrefValue, true.ToString(), score.ToString()));
+        PlayerPrefs.SetString(string.Format(LevelPrefKey, currentLevel+1), string.Format(LevelDataPrefValue, true.ToString(), "0"));
     }
 
     private void OnClickedPlayLevel(int no)
@@ -173,6 +175,7 @@ public class LevelData
 
     public void ChangeLockStatus(bool state)
     {
+        Debug.Log($"{LevelNumber} staus changed");
         IsLocked = state;
     }
 

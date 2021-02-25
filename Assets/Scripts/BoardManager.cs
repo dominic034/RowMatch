@@ -53,7 +53,6 @@ public class BoardManager : MonoBehaviour
     private void OnInitializeLevel(LevelData level)
     {
         _currentLevel = level;
-        Debug.Log(_currentLevel);
         LoadLevel();
     }
     
@@ -219,7 +218,6 @@ public class BoardManager : MonoBehaviour
     #region CREATE BOARD
     private void CreateBoard(int width, int height)
     {
-        Debug.Log(width + " " + height);
         _allTileBackgrounds = new TileBackground[width, height];
         var offset = tileBackgroundPrefab.BoundsSize;
         var startPos = transform.position;

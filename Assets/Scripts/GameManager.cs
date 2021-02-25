@@ -49,7 +49,6 @@ public class GameManager : MonoBehaviour
         if(type == CompleteType.None)
             return;
         
-        Debug.Log("Open levels");
         OnOpenLevelsPopUp.Invoke();
     }
 }
