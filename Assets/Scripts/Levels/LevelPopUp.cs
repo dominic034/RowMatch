@@ -16,6 +16,7 @@ namespace Levels
         private void Start()
         {
             GameManager.Instance.OnOpenLevelsPopUp.AddListener(OnOpenLevelsPopUp);
+            GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
         }
 
         private void OnDestroy()
@@ -23,6 +24,11 @@ namespace Levels
             exitButton.OnClick.RemoveAllListeners();
         }
 
+        private void OnClickedPlayLevel(int no)
+        {
+            panel.SetActive(false);
+        }
+        
         private void OnEachCellCreated(ScrollerCell cell, int index)
         {
             var levelCell = (LevelCell) cell;

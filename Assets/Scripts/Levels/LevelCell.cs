@@ -10,6 +10,7 @@ namespace Levels
         [SerializeField] private TextMeshPro highScore;
         [SerializeField] private SpriteButton playButton;
 
+        private int _levelNumber;
         private void Awake()
         {
             playButton.OnClick.AddListener(OnClickedPlayButton);
@@ -25,11 +26,12 @@ namespace Levels
             headerText.text = $"Level {data.LevelNumber} - Move {data.MoveCount}";
             highScore.text = data.HighScore == 0 ? "No Score" : $"High Score: {data.HighScore}";
             playButton.Interactable = data.IsLocked;
+            _levelNumber = data.HighScore;
         }
 
         public void OnClickedPlayButton()
         {
-            
+            GameManager.Instance.OnPlayLevelButtonEvent.Invoke(_levelNumber);
         }
 
     }

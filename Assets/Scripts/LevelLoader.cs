@@ -9,6 +9,9 @@ public class LevelLoader : MonoBehaviour
     private static LevelLoader _instance;
     
     private const string LevelPath = "Levels/RM_A{0}";
+    private const string LevelPrefKey = "Level_{0}";
+    private const string LevelDataPrefValue = "{0}:{1}";
+    private const string DefaultLevelData = "false:0";
     private List<LevelData> _levels = new List<LevelData>();
 
     public static LevelLoader Instance
@@ -22,13 +25,28 @@ public class LevelLoader : MonoBehaviour
     private void Awake()
     {
         _instance = this;
+        
     }
 
     private void Start()
     {
+        GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+        GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
         LoadFirst10Level();
     }
 
+    private void OnLevelCompleted(CompleteType _, int score, int currentLevel)
+    {
+        PlayerPrefs.SetString(string.Format(LevelPrefKey, currentLevel), string.Format(LevelDataPrefValue, true.ToString(), score.ToString()));
+        _levels[currentLevel -1].ChangeLockStatus(true);
+        _levels[currentLevel -1].SetHighScore(score);
+    }
+
+    private void OnClickedPlayLevel(int no)
+    {
+        GameManager.Instance.OnInitializeLevelEvent.Invoke(GetLevelAtIndex(no));
+    }
+    
     public LevelData GetLevelAtIndex(int index)
     {
         if (index < 0 || index >= _levels.Count)
@@ -50,7 +68,9 @@ public class LevelLoader : MonoBehaviour
             path = Path.Combine(Application.streamingAssetsPath, string.Format(LevelPath, i));
             string[] lines = File.ReadAllLines(path);
             ReadAllLines(lines);
-        }    
+        }
+        
+        _levels[0].ChangeLockStatus(true);
     }
 
     private void ReadAllLines(string[] lines)
@@ -85,7 +105,10 @@ public class LevelLoader : MonoBehaviour
             }
         }
 
-        LevelData levelData = new LevelData(level, width, height, move, grid); 
+        string prefData = PlayerPrefs.GetString(string.Format(LevelPrefKey, level), DefaultLevelData);
+        string[] vals = prefData.Split(':');
+
+        LevelData levelData = new LevelData(level, width, height, move, grid, Convert.ToBoolean(vals[0]), Convert.ToInt32(vals[1])); 
         // Debug.Log(levelData);
         _levels.Add(levelData);
     }
@@ -127,7 +150,7 @@ public class LevelLoader : MonoBehaviour
     }
 }
 
-public struct LevelData
+public class LevelData
 {
     public int LevelNumber { get; private set; }
     public int Width { get; private set; } 

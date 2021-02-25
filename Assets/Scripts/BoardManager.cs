@@ -47,8 +47,15 @@ public class BoardManager : MonoBehaviour
     private void Start()
     {
         GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+        GameManager.Instance.OnInitializeLevelEvent.AddListener(OnInitializeLevel);
     }
 
+    private void OnInitializeLevel(LevelData level)
+    {
+        _currentLevel = level;
+        LoadLevel();
+    }
+    
     private void LoadLevel()
     {
         OnSwipeStartEvent.AddListener(OnSwipeStart);
@@ -74,7 +81,7 @@ public class BoardManager : MonoBehaviour
         StopAllCoroutines();
     }
 
-    private void OnLevelCompleted(CompleteType _, int score)
+    private void OnLevelCompleted(CompleteType _, int score, int currentLevel)
     {
         UnLoadLevel();
     }
