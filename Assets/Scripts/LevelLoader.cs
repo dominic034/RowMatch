@@ -30,12 +30,12 @@ public class LevelLoader : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+        GameManager.Instance.OnLevelResultEvent.AddListener(OnLevelResult);
         GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
         LoadFirst10Level();
     }
 
-    private void OnLevelCompleted(CompleteType _, int score, int currentLevel)
+    private void OnLevelResult(int score, int currentLevel)
     {
         PlayerPrefs.SetString(string.Format(LevelPrefKey, currentLevel), string.Format(LevelDataPrefValue, true.ToString(), score.ToString()));
         _levels[currentLevel -1].ChangeLockStatus(true);
@@ -44,7 +44,7 @@ public class LevelLoader : MonoBehaviour
 
     private void OnClickedPlayLevel(int no)
     {
-        GameManager.Instance.OnInitializeLevelEvent.Invoke(GetLevelAtIndex(no));
+        GameManager.Instance.OnInitializeLevelEvent.Invoke(GetLevelAtIndex(no - 1));
     }
     
     public LevelData GetLevelAtIndex(int index)

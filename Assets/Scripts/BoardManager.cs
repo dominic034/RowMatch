@@ -53,6 +53,7 @@ public class BoardManager : MonoBehaviour
     private void OnInitializeLevel(LevelData level)
     {
         _currentLevel = level;
+        Debug.Log(_currentLevel);
         LoadLevel();
     }
     
@@ -81,7 +82,7 @@ public class BoardManager : MonoBehaviour
         StopAllCoroutines();
     }
 
-    private void OnLevelCompleted(CompleteType _, int score, int currentLevel)
+    private void OnLevelCompleted(CompleteType _)
     {
         UnLoadLevel();
     }
@@ -101,7 +102,7 @@ public class BoardManager : MonoBehaviour
         if (moveCount == 0)
         {
             Debug.Log("Level is done, and your points: " + totalPoints);
-            GameManager.Instance.CheckScore(totalPoints);
+            GameManager.Instance.OnLevelResultEvent.Invoke(totalPoints, _currentLevel.LevelNumber);
         }
     }
     
@@ -218,6 +219,7 @@ public class BoardManager : MonoBehaviour
     #region CREATE BOARD
     private void CreateBoard(int width, int height)
     {
+        Debug.Log(width + " " + height);
         _allTileBackgrounds = new TileBackground[width, height];
         var offset = tileBackgroundPrefab.BoundsSize;
         var startPos = transform.position;

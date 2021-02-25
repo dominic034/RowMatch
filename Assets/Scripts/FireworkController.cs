@@ -15,8 +15,11 @@ public class FireworkController : MonoBehaviour
         GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelComplete);
     }
 
-    private void OnLevelComplete(CompleteType _, int score, int currentLevel)
+    private void OnLevelComplete(CompleteType type)
     {
+        if(type != CompleteType.NewScore)
+            return;
+        
         foreach (var f in fireworks)
             f.DoMoveY(Random.Range(minRandom, maxRandom),speed);
     }
@@ -24,6 +27,6 @@ public class FireworkController : MonoBehaviour
     [ContextMenu("Fireworks")]
     private void TEST_Fireworks()
     {
-        OnLevelComplete(CompleteType.None, 0, 1);
+        OnLevelComplete(CompleteType.None);
     }
 }

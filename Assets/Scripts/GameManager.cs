@@ -6,24 +6,22 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     
     private const string HighestScorePrefKey = "HighestScore";
-    private const string LastUnlockedLevelPrefKey = "LastUnlockedLevel";
     
-    private int _lastUnlockedLevel;
     private int _highestScore;
-    private int _currentLevel;
     
     public LevelCompletedEvent OnLevelCompletedEvent { get; private set; } = new LevelCompletedEvent();
     public UnityEvent OnOpenLevelsPopUp { get; private set; } = new UnityEvent();
     public PlayLevelButtonEvent OnPlayLevelButtonEvent { get; private set; } = new PlayLevelButtonEvent();
     public InitializeLevelEvent OnInitializeLevelEvent { get; private set; } = new InitializeLevelEvent();
+    public LevelResultEvent OnLevelResultEvent { get; private set; } = new LevelResultEvent();
     
     private void Awake()
     {
         Instance = this;
-        _lastUnlockedLevel = PlayerPrefs.GetInt(LastUnlockedLevelPrefKey, 1);
         _highestScore = PlayerPrefs.GetInt(HighestScorePrefKey, 0);
         
         OnLevelCompletedEvent.AddListener(OnLevelCompleted);
+        OnLevelResultEvent.AddListener(OnLevelResult);
     }
 
     private void OnDestroy()
@@ -32,32 +30,36 @@ public class GameManager : MonoBehaviour
         OnLevelCompletedEvent.RemoveAllListeners();
     }
 
-    public void CheckScore(int score)
+    private void OnLevelResult(int score, int levelNo)
     {
         if (score <= _highestScore)
         {
-            OnLevelCompletedEvent.Invoke(CompleteType.None, score, _currentLevel);
+            OnLevelCompletedEvent.Invoke(CompleteType.None);
             return;
         }
 
         _highestScore = score;
-        _lastUnlockedLevel += 1;
         
         PlayerPrefs.SetInt(HighestScorePrefKey, _highestScore);
-        PlayerPrefs.SetInt(LastUnlockedLevelPrefKey, _lastUnlockedLevel);
-        OnLevelCompletedEvent.Invoke(CompleteType.NewScore, score, _currentLevel);
+        OnLevelCompletedEvent.Invoke(CompleteType.NewScore);
     }
 
-    private void OnLevelCompleted(CompleteType type, int score, int currentLevel)
+    private void OnLevelCompleted(CompleteType type)
     {
         if(type == CompleteType.None)
             return;
         
+        Debug.Log("Open levels");
         OnOpenLevelsPopUp.Invoke();
     }
 }
 
-public class LevelCompletedEvent : UnityEvent<CompleteType, int, int>
+public class LevelCompletedEvent : UnityEvent<CompleteType>
+{
+    
+}
+
+public class LevelResultEvent : UnityEvent<int, int>
 {
     
 }

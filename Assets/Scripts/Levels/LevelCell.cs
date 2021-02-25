@@ -26,11 +26,12 @@ namespace Levels
             headerText.text = $"Level {data.LevelNumber} - Move {data.MoveCount}";
             highScore.text = data.HighScore == 0 ? "No Score" : $"High Score: {data.HighScore}";
             playButton.Interactable = data.IsLocked;
-            _levelNumber = data.HighScore;
+            _levelNumber = data.LevelNumber;
         }
 
         public void OnClickedPlayButton()
         {
+            Debug.Log("Clicked: " + _levelNumber);
             GameManager.Instance.OnPlayLevelButtonEvent.Invoke(_levelNumber);
         }
 

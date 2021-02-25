@@ -100,6 +100,7 @@ namespace UI
                     break;
                 case SelectionState.Pressed:
                     onClick.Invoke();
+                    _isPointerDown = false;
                     break;
             }
             
@@ -145,6 +146,7 @@ namespace UI
                 return;
 
             _isPointerOn = false;
+            _isPointerDown = false;
             EvaluatePointerState();
         }
         

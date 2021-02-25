@@ -37,6 +37,7 @@ namespace Levels
         
         private void OnOpenLevelsPopUp()
         {
+            Debug.Log("open");
             panel.SetActive(true);
             verticalScroller.ReloadScroller(LevelLoader.Instance.GetLevelsCount());
         }
