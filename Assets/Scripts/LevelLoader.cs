@@ -6,7 +6,6 @@ using UnityEngine;
 public class LevelLoader : MonoBehaviour
 {
     private readonly LevelData _blankLevelData = new LevelData(-1, -1, -1, -1, new CellType[0,0]);
-    private static LevelLoader _instance;
     
     private const string LevelPath = "Levels/RM_A{0}";
     private const string LevelPrefKey = "Level_{0}";
@@ -14,18 +13,11 @@ public class LevelLoader : MonoBehaviour
     private const string DefaultLevelData = "false:0";
     private List<LevelData> _levels = new List<LevelData>();
 
-    public static LevelLoader Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
-    
+    public static LevelLoader Instance { get; private set; }
+
     private void Awake()
     {
-        _instance = this;
-        
+        Instance = this;
     }
 
     private void Start()

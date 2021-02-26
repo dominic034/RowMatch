@@ -4,8 +4,6 @@ using UnityEngine.Events;
 
 public class BoardManager : MonoBehaviour
 {
-    public static BoardManager Instance { get; private set; }
-    
     [Header("Prefabs")]
     [SerializeField] private TileBackground tileBackgroundPrefab;
     [SerializeField] private Tile tilePrefab;
@@ -39,11 +37,6 @@ public class BoardManager : MonoBehaviour
     private TileInteractableChangedEvent OnTileInteractableChangedEvent { get; set; } = new TileInteractableChangedEvent();
     private ResetTileBackgroundEvent OnResetTileBackgroundEvent { get; set; } = new ResetTileBackgroundEvent();
     
-    private void Awake()
-    {
-        Instance = this;
-    }
-
     private void Start()
     {
         GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
@@ -97,7 +90,8 @@ public class BoardManager : MonoBehaviour
         moveCount -= 1;
         EvaluateSwipe(_currentTile.ArrayIndex, _targetTile.ArrayIndex);
         OnTileInteractableChangedEvent.Invoke(moveCount != 0);
-
+        GameManager.Instance.OnGameHudUpdateEvent.Invoke(moveCount, totalPoints);
+        
         if (moveCount == 0)
         {
             // Debug.Log("Level is done, and your points: " + totalPoints);

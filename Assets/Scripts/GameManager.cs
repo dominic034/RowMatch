@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public InitializeLevelEvent OnInitializeLevelEvent { get; private set; } = new InitializeLevelEvent();
     public LevelResultEvent OnLevelResultEvent { get; private set; } = new LevelResultEvent();
     public UnityEvent OnReturnMainMenu { get; private set; } = new UnityEvent();
+    public GameHudUpdateEvent OnGameHudUpdateEvent { get; private set; } = new GameHudUpdateEvent();
     
     private void Awake()
     {
@@ -28,7 +29,12 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         OnLevelCompletedEvent.RemoveAllListeners();
-        OnLevelCompletedEvent.RemoveAllListeners();
+        OnOpenLevelsPopUp.RemoveAllListeners();
+        OnPlayLevelButtonEvent.RemoveAllListeners();
+        OnInitializeLevelEvent.RemoveAllListeners();
+        OnLevelResultEvent.RemoveAllListeners();
+        OnReturnMainMenu.RemoveAllListeners();
+        OnGameHudUpdateEvent.RemoveAllListeners();
     }
 
     private void OnLevelResult(int score, int levelNo)
@@ -48,7 +54,10 @@ public class GameManager : MonoBehaviour
     private void OnLevelCompleted(CompleteType type)
     {
         if(type == CompleteType.None)
+        {
+            OnReturnMainMenu.Invoke();
             return;
+        }
         
         OnOpenLevelsPopUp.Invoke();
     }
@@ -70,6 +79,11 @@ public class InitializeLevelEvent : UnityEvent<LevelData>
 }
 
 public class PlayLevelButtonEvent : UnityEvent<int>
+{
+    
+}
+
+public class GameHudUpdateEvent : UnityEvent<int, int>
 {
     
 }
