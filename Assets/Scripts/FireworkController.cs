@@ -26,6 +26,6 @@ public class FireworkController : MonoBehaviour
     [ContextMenu("Fireworks")]
     private void TEST_Fireworks()
     {
-        OnLevelComplete(CompleteType.None);
+        OnLevelComplete(CompleteType.NewScore);
     }
 }

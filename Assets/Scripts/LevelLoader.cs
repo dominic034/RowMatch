@@ -207,7 +207,7 @@ public class LevelLoader : MonoBehaviour
         string[] vals = prefData.Split(':');
 
         LevelData levelData = new LevelData(level, width, height, move, grid, Convert.ToBoolean(vals[0]), Convert.ToInt32(vals[1])); 
-        Debug.Log(levelData);
+        // Debug.Log(levelData);
         _levels.Add(levelData);
     }
 
