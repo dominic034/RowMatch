@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     
     private const string HighestScorePrefKey = "HighestScore";
     
-    private int _highestScore;
+    [SerializeField] private int _highestScore;
     
     public LevelCompletedEvent OnLevelCompletedEvent { get; private set; } = new LevelCompletedEvent();
     public UnityEvent OnOpenLevelsPopUp { get; private set; } = new UnityEvent();
@@ -59,8 +59,6 @@ public class GameManager : MonoBehaviour
             OnReturnMainMenu.Invoke();
             return;
         }
-        
-        OnOpenLevelsPopUp.Invoke();
     }
 }
 

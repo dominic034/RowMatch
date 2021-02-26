@@ -141,7 +141,6 @@ public class LevelLoader : MonoBehaviour
         _levels.Sort();
         _levels[0].ChangeLockStatus(true);
         GameManager.Instance.OnLevelsAreLoaded.Invoke();
-
     }
     
     private IEnumerator DownloadLevel(string url)

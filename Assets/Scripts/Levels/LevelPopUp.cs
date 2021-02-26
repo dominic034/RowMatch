@@ -7,7 +7,8 @@ namespace Levels
     public class LevelPopUp : PopUp
     {
         [SerializeField] private VerticalScroller verticalScroller;
-        
+        [SerializeField] private float newScoreDelay;
+
         private void Awake()
         {
             exitButton.OnClick.AddListener(OnClickedExitButton);
@@ -16,6 +17,7 @@ namespace Levels
 
         private void Start()
         {
+            GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
             GameManager.Instance.OnOpenLevelsPopUp.AddListener(OnOpenLevelsPopUp);
             GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
         }
@@ -25,6 +27,12 @@ namespace Levels
             exitButton.OnClick.RemoveAllListeners();
         }
 
+        private void OnLevelCompleted(CompleteType type)
+        {
+            if (type == CompleteType.NewScore)
+                StartCoroutine(DelayForOpen(newScoreDelay));
+        }
+        
         private void OnClickedPlayLevel(int no)
         {
             panel.SetActive(false);
@@ -42,7 +50,13 @@ namespace Levels
             panel.SetActive(true);
             StartCoroutine(Wait());
         }
-
+        
+        private IEnumerator DelayForOpen(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            GameManager.Instance.OnOpenLevelsPopUp.Invoke();
+        }
+        
         private IEnumerator Wait()
         {
             yield return new WaitForEndOfFrame();

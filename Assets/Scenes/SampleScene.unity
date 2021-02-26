@@ -259,6 +259,8 @@ MonoBehaviour:
   panel: {fileID: 273635267}
   exitButton: {fileID: 1599611280}
   verticalScroller: {fileID: 1857256238}
+  newScoreDelay: 2
+  _isNewScore: 0
 --- !u!1 &273635267
 GameObject:
   m_ObjectHideFlags: 0
