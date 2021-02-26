@@ -1,32 +1,63 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class LevelLoader : MonoBehaviour
 {
     private readonly LevelData _blankLevelData = new LevelData(-1, -1, -1, -1, new CellType[0,0]);
-    
-    private const string LevelPath = "Levels/RM_A{0}";
+
+    private const string OfflineLevelsPath = "Levels";
+    private const string DownloadedLevelsPath = "DownloadedLevels";
+    private const string LevelUrlsPath = "LevelUrls";
     private const string LevelPrefKey = "Level_{0}";
     private const string LevelDataPrefValue = "{0}:{1}";
     private const string DefaultLevelData = "false:0";
+    private const string FirstLunchPrefKey = "HasPlay";
+    private const string LevelUrlHead = "https://row-match.s3.amazonaws.com/levels/";
+    
     private List<LevelData> _levels = new List<LevelData>();
-
+    private bool _hasPlayed;
+    
     public static LevelLoader Instance { get; private set; }
 
     private void Awake()
     {
         Instance = this;
+        _hasPlayed = Convert.ToBoolean(PlayerPrefs.GetInt(FirstLunchPrefKey, 0));
+        
+        if(!_hasPlayed)
+            OnFirstLunch();
+        else
+        {
+            LoadOfflineLevels();
+            LoadDownloadedLevels();
+        }
     }
 
     private void Start()
     {
         GameManager.Instance.OnLevelResultEvent.AddListener(OnLevelResult);
         GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
-        LoadFirst10Level();
     }
 
+    private void OnFirstLunch()
+    {
+        _hasPlayed = true;
+        PlayerPrefs.SetInt(FirstLunchPrefKey, 1);
+
+        string path = Path.Combine(Application.streamingAssetsPath, DownloadedLevelsPath);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        
+        LoadOfflineLevels();
+        
+        _levels[0].ChangeLockStatus(true);
+        StartCoroutine(DownloadAllLevels());
+    }
+    
     private void OnLevelResult(int score, int currentLevel)
     {
         _levels[currentLevel].ChangeLockStatus(true);
@@ -54,17 +85,76 @@ public class LevelLoader : MonoBehaviour
         return _levels.Count;
     }
     
-    private void LoadFirst10Level()
+    private void LoadOfflineLevels()
     {
-        string path = "";
-        for (int i = 1; i <= 10; i++)
+        string path = Path.Combine(Application.streamingAssetsPath, OfflineLevelsPath);
+        string[] offlineLevels = Directory.GetFiles(path);
+
+        foreach (var level in offlineLevels)
         {
-            path = Path.Combine(Application.streamingAssetsPath, string.Format(LevelPath, i));
-            string[] lines = File.ReadAllLines(path);
+            if(level.Contains(".meta"))
+                continue;
+            
+            string[] lines = File.ReadAllLines(level);
             ReadAllLines(lines);
         }
+        _levels.Sort();
+    }
+
+    private void LoadDownloadedLevels()
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, DownloadedLevelsPath);
+        string[] levels = Directory.GetFiles(path);
+
+        foreach (var level in levels)
+        {
+            if(level.Contains(".meta"))
+                continue;
+
+            string[] lines = File.ReadAllLines(level);
+            ReadAllLines(lines);
+        }
+    }
+
+    private IEnumerator DownloadAllLevels()
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, LevelUrlsPath);
+        string[] allLevels = File.ReadAllLines(path);
+        foreach (var level in allLevels)
+        {
+            if(level.Contains(".meta"))
+                continue;
+            
+            yield return DownloadLevel(level);
+        }
+    }
+    
+    private IEnumerator DownloadLevel(string url)
+    {
+        string nm = url.Replace(LevelUrlHead, String.Empty);
+        UnityWebRequest request = new UnityWebRequest(url) {downloadHandler = new DownloadHandlerBuffer()};
+        yield return request.SendWebRequest();
         
-        _levels[0].ChangeLockStatus(true);
+        if (!request.isDone)
+        {
+            Debug.Log("error");
+            request.Dispose();
+            yield break;
+        }
+        
+        string filePath = Path.Combine(Application.streamingAssetsPath, DownloadedLevelsPath, nm);
+        if (!File.Exists(filePath))
+            File.Create(filePath).Close();
+
+        File.WriteAllText(filePath, request.downloadHandler.text);
+        
+        StringReader reader = new StringReader(request.downloadHandler.text);
+        List<string> lines = new List<string>();
+        string line = "";
+        while ((line = reader.ReadLine()) != null)
+            lines.Add(line);
+
+        ReadAllLines(lines.ToArray());
     }
 
     private void ReadAllLines(string[] lines)
@@ -103,7 +193,7 @@ public class LevelLoader : MonoBehaviour
         string[] vals = prefData.Split(':');
 
         LevelData levelData = new LevelData(level, width, height, move, grid, Convert.ToBoolean(vals[0]), Convert.ToInt32(vals[1])); 
-        // Debug.Log(levelData);
+        Debug.Log(levelData);
         _levels.Add(levelData);
     }
 
@@ -144,7 +234,7 @@ public class LevelLoader : MonoBehaviour
     }
 }
 
-public class LevelData
+public class LevelData : IComparable<LevelData>
 {
     public int LevelNumber { get; private set; }
     public int Width { get; private set; } 
@@ -174,6 +264,14 @@ public class LevelData
     public void SetHighScore(int highScore)
     {
         HighScore = highScore;
+    }
+
+    public int CompareTo(LevelData other)
+    {
+        if (other == null)
+            return 1;
+
+        return LevelNumber.CompareTo(other.LevelNumber);
     }
 
     public override string ToString()

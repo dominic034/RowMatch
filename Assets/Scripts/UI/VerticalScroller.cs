@@ -50,9 +50,9 @@ namespace UI
             InitializeContent();
             
             VerticalLayoutGroup.spacing = (space * transform.localScale.y) * .1f;
-            float cellHeight = .2f;
+            float cellHeight = prefab.transform.localScale.y;
             float spacing = VerticalLayoutGroup.spacing;
-            int totalCellCount = 10;
+            int totalCellCount = dataCount;
 
             float totalHeight = totalCellCount * cellHeight + spacing * (totalCellCount - 1);
             content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight);
