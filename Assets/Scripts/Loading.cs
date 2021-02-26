@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Loading : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private GameObject panel;
+
+    private void Start()
     {
-        
+        panel.SetActive(true);
+        GameManager.Instance.OnLevelsAreLoaded.AddListener(OnLevelsAreLoaded);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnLevelsAreLoaded()
     {
-        
+        panel.SetActive(false);
     }
 }

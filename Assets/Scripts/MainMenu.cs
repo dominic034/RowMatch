@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     private void Awake()
     {
         levelsButton.OnClick.AddListener(OnClickedLevelsButton);
+        panel.SetActive(false);
     }
 
     private void Start()
@@ -17,8 +18,14 @@ public class MainMenu : MonoBehaviour
         GameManager.Instance.OnLevelCompletedEvent.AddListener(OnLevelCompleted);
         GameManager.Instance.OnReturnMainMenu.AddListener(OnReturnMainMenu);
         GameManager.Instance.OnOpenLevelsPopUp.AddListener(OnOpenLevelsPopUp);
+        GameManager.Instance.OnLevelsAreLoaded.AddListener(OnLevelsAreLoaded);
     }
 
+    private void OnLevelsAreLoaded()
+    {
+        panel.SetActive(true);
+    }
+    
     private void OnLevelCompleted(CompleteType type)
     {
         if(type != CompleteType.None)

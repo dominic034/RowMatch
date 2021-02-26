@@ -27,6 +27,13 @@ public class LevelLoader : MonoBehaviour
     {
         Instance = this;
         _hasPlayed = Convert.ToBoolean(PlayerPrefs.GetInt(FirstLunchPrefKey, 0));
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.OnLevelResultEvent.AddListener(OnLevelResult);
+        GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
+        GameManager.Instance.OnLevelsAreLoaded.AddListener(OnLevelsAreLoaded);
         
         if(!_hasPlayed)
             OnFirstLunch();
@@ -34,28 +41,13 @@ public class LevelLoader : MonoBehaviour
         {
             LoadOfflineLevels();
             LoadDownloadedLevels();
+            GameManager.Instance.OnLevelsAreLoaded.Invoke();
         }
     }
 
-    private void Start()
+    private void OnLevelsAreLoaded()
     {
-        GameManager.Instance.OnLevelResultEvent.AddListener(OnLevelResult);
-        GameManager.Instance.OnPlayLevelButtonEvent.AddListener(OnClickedPlayLevel);
-    }
-
-    private void OnFirstLunch()
-    {
-        _hasPlayed = true;
-        PlayerPrefs.SetInt(FirstLunchPrefKey, 1);
-
-        string path = Path.Combine(Application.streamingAssetsPath, DownloadedLevelsPath);
-        if (!Directory.Exists(path))
-            Directory.CreateDirectory(path);
-        
-        LoadOfflineLevels();
-        
-        _levels[0].ChangeLockStatus(true);
-        StartCoroutine(DownloadAllLevels());
+        _levels.Sort();
     }
     
     private void OnLevelResult(int score, int currentLevel)
@@ -70,6 +62,16 @@ public class LevelLoader : MonoBehaviour
     private void OnClickedPlayLevel(int no)
     {
         GameManager.Instance.OnInitializeLevelEvent.Invoke(GetLevelAtIndex(no - 1));
+    }
+    
+    private void OnFirstLunch()
+    {
+        _hasPlayed = true;
+        PlayerPrefs.SetInt(FirstLunchPrefKey, 1);
+        PlayerPrefs.SetString(string.Format(LevelPrefKey, 1), string.Format(LevelDataPrefValue, true.ToString(), "0"));
+
+        LoadOfflineLevels();
+        StartCoroutine(DownloadAllLevels());
     }
     
     public LevelData GetLevelAtIndex(int index)
@@ -114,11 +116,19 @@ public class LevelLoader : MonoBehaviour
             string[] lines = File.ReadAllLines(level);
             ReadAllLines(lines);
         }
+        
+        _levels.Sort();
     }
 
     private IEnumerator DownloadAllLevels()
     {
-        string path = Path.Combine(Application.streamingAssetsPath, LevelUrlsPath);
+        string path = Path.Combine(Application.streamingAssetsPath, DownloadedLevelsPath);
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        
+        yield return null;
+        
+        path = Path.Combine(Application.streamingAssetsPath, LevelUrlsPath);
         string[] allLevels = File.ReadAllLines(path);
         foreach (var level in allLevels)
         {
@@ -127,6 +137,11 @@ public class LevelLoader : MonoBehaviour
             
             yield return DownloadLevel(level);
         }
+        
+        _levels.Sort();
+        _levels[0].ChangeLockStatus(true);
+        GameManager.Instance.OnLevelsAreLoaded.Invoke();
+
     }
     
     private IEnumerator DownloadLevel(string url)
