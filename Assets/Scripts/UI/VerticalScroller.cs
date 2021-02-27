@@ -48,13 +48,13 @@ namespace UI
         public void ReloadScroller(int dataCount)
         {
             InitializeContent();
-            
-            VerticalLayoutGroup.spacing = (space * transform.localScale.y) * .1f;
+
+            VerticalLayoutGroup.spacing = space * .1f * transform.localScale.y * prefab.transform.localScale.y;
             float cellHeight = prefab.transform.localScale.y;
             float spacing = VerticalLayoutGroup.spacing;
             int totalCellCount = dataCount;
 
-            float totalHeight = totalCellCount * cellHeight + spacing * (totalCellCount - 1);
+            float totalHeight = totalCellCount * cellHeight + spacing * (totalCellCount);
             content.sizeDelta = new Vector2(content.sizeDelta.x, totalHeight);
             _maxScrollPos = content.sizeDelta.y - RectTransform.sizeDelta.y;
             
