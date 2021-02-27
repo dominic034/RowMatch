@@ -164,11 +164,11 @@ public class Tile : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         float distance =
             Vector3.Distance(ScreenToWorldPosition(finalMousePos), ScreenToWorldPosition(_initialMousePos));
         // Debug.Log("DISTANCE: " + distance);
-        if(distance < transform.localScale.x * .25f)
-        {
-            // Debug.Log("DIRECTION : " + direction);
-            return;
-        }
+        // if(distance < transform.localScale.x * .1f)
+        // {
+        //     // Debug.Log("DIRECTION : " + direction);
+        //     return;
+        // }
         
         Vector3 res = finalMousePos - _initialMousePos;
         bool isVertical = Mathf.Abs(res.y) > Mathf.Abs(res.x);
